@@ -1,4 +1,4 @@
-﻿/* public/js/roomUI.js
+/* public/js/roomUI.js
  * Handles Home, Lobby and Role-Select UI.
  * Reads App.isHost and App.myCharId; emits via SocketClient.
  */
@@ -9,6 +9,14 @@ const RoomUI = (() => {
   // ────────────────────────────────────────────────
   //  Init (attach one-time listeners)
   // ────────────────────────────────────────────────
+  function _playMusic() {
+    const audio = document.getElementById('bg-music');
+    if (audio && audio.paused) {
+      audio.volume = 0.2; // keep it low
+      audio.play().catch(e => console.warn('Autoplay blocked:', e));
+    }
+  }
+
   function init() {
     // ── Home ────────────────────────────────────────
     const nameInput = document.getElementById('player-name');
@@ -17,6 +25,7 @@ const RoomUI = (() => {
       const name = nameInput.value.trim();
       if (!_requireName(name)) return;
       App.myName = name;
+      _playMusic();
       SocketClient.emit('room:create', { playerName: name });
     });
 
@@ -26,6 +35,7 @@ const RoomUI = (() => {
       if (!_requireName(name)) return;
       if (!code) { alert('Inserisci il codice stanza!'); return; }
       App.myName = name;
+      _playMusic();
       SocketClient.emit('room:join', { roomId: code, playerName: name });
     });
 
