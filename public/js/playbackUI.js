@@ -32,7 +32,14 @@ const PlaybackUI = (() => {
     btnAgain.hidden      = !App.isHost;
     btnAgain.textContent = '🔄 Nuova Partita';
     btnPlay.onclick      = () => _playAll();
-    btnAgain.onclick     = () => SocketClient.emit('room:reset');
+    btnAgain.onclick     = () => {
+      AudioEngine.stopAll();
+      _playing = false;
+      if (_progInt) { clearInterval(_progInt); _progInt = null; }
+      const vidEl = document.getElementById('final-video');
+      if (vidEl) vidEl.pause();
+      SocketClient.emit('room:reset');
+    };
   }
 
   // ────────────────────────────────────────────────

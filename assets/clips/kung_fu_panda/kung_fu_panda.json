@@ -1,103 +1,97 @@
 {
-  "id": "kung_fu_panda",
-  "titolo": "Kung Fu Panda - Shifu vs Tai Lung",
-  "durata": 41,
-  "video": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/sub.mp4",
-  "soundtrack": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/soundtrack.mp3",
-  "personaggi": [
-    {
-      "id": "tai_lung",
-      "nome": "Tai Lung",
-      "battute": [
-        [
-          13.626,
-          17.625999999999998
-        ],
-        [
-          19.959,
-          23.959
-        ],
-        [
-          23.843,
-          27.843
-        ],
-        [
-          26.721,
-          30.721
-        ],
-        [
-          33.326,
-          37.326
-        ]
-      ],
-      "vociSeparate": [
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/01_Tai Lung.mp3",
-          "start": 13.626
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/02_Tai Lung.mp3",
-          "start": 19.959
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/03_Tai Lung.mp3",
-          "start": 23.843
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/04_Tai Lung.mp3",
-          "start": 26.721
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/05_Tai Lung.mp3",
-          "start": 33.326
-        }
-      ]
-    },
-    {
-      "id": "shifu",
-      "nome": "Shifu",
-      "battute": [
-        [
-          16.393,
-          20.393
-        ],
-        [
-          17.943,
-          21.943
-        ],
-        [
-          29.626,
-          33.626000000000005
-        ],
-        [
-          36.726,
-          40.726
-        ]
-      ],
-      "vociSeparate": [
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/201_Shifu.mp3",
-          "start": 16.393
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/202_Shifu.mp3",
-          "start": 17.943
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/203_Shifu.mp3",
-          "start": 29.626
-        },
-        {
-          "url": "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/204_Shifu.mp3",
-          "start": 36.726
-        }
-      ]
-    },
-    {
-      "id": "po",
-      "nome": "Po",
-      "battute": [],
-      "vociSeparate": []
-    }
-  ]
+    "id":  "kung_fu_panda",
+    "titolo":  "Kung Fu Panda - Shifu vs Tai Lung",
+    "durata":  41,
+    "video":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/sub.mp4",
+    "soundtrack":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/soundtrack.mp3",
+    "personaggi":  [
+                       {
+                           "id":  "tai_lung",
+                           "nome":  "Tai Lung",
+                           "battute":  [
+                                           [
+                                               13.626,
+                                               17.625999999999998
+                                           ],
+                                           [
+                                               19.959,
+                                               23.959
+                                           ],
+                                           [
+                                               23.843,
+                                               27.843
+                                           ],
+                                           [
+                                               26.721,
+                                               30.721
+                                           ],
+                                           [
+                                               33.326,
+                                               37.326
+                                           ]
+                                       ],
+                           "vociSeparate":  [
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/01_Tai Lung.mp3",
+                                                    "start":  13.626
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/02_Tai Lung.mp3",
+                                                    "start":  19.959
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/03_Tai Lung.mp3",
+                                                    "start":  23.843
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/04_Tai Lung.mp3",
+                                                    "start":  26.721
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/05_Tai Lung.mp3",
+                                                    "start":  33.326
+                                                }
+                                            ]
+                       },
+                       {
+                           "id":  "shifu",
+                           "nome":  "Shifu",
+                           "battute":  [
+                                           [
+                                               16.393,
+                                               20.393
+                                           ],
+                                           [
+                                               17.943,
+                                               21.943
+                                           ],
+                                           [
+                                               29.626,
+                                               33.626000000000005
+                                           ],
+                                           [
+                                               36.726,
+                                               40.726
+                                           ]
+                                       ],
+                           "vociSeparate":  [
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/201_Shifu.mp3",
+                                                    "start":  16.393
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/202_Shifu.mp3",
+                                                    "start":  17.943
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/203_Shifu.mp3",
+                                                    "start":  29.626
+                                                },
+                                                {
+                                                    "url":  "https://aiwgkerkrssfkthhlfjj.supabase.co/storage/v1/object/public/dub-assets/kung_fu_panda/204_Shifu.mp3",
+                                                    "start":  36.726
+                                                }
+                                            ]
+                       }
+                   ]
 }
