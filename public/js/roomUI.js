@@ -21,6 +21,27 @@ const RoomUI = (() => {
   document.addEventListener('click', _playMusic, { once: true });
 
   function init() {
+    // ── Volume Control ──────────────────────────────
+    const bgAudio = document.getElementById('bg-music');
+    const btnMute = document.getElementById('btn-mute');
+    const volSlider = document.getElementById('volume-slider');
+
+    btnMute.addEventListener('click', () => {
+      bgAudio.muted = !bgAudio.muted;
+      btnMute.textContent = bgAudio.muted ? '🔇' : '🔊';
+    });
+
+    volSlider.addEventListener('input', (e) => {
+      bgAudio.volume = e.target.value;
+      if (bgAudio.volume === 0 || bgAudio.volume === "0") {
+        bgAudio.muted = true;
+        btnMute.textContent = '🔇';
+      } else {
+        bgAudio.muted = false;
+        btnMute.textContent = '🔊';
+      }
+    });
+
     // ── Home ────────────────────────────────────────
     const nameInput = document.getElementById('player-name');
 
