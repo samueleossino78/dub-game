@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 const { randomBytes } = require('crypto');
 
@@ -8,13 +8,13 @@ class RoomManager {
     this.clipRegistry = clipRegistry;
     /** @type {Map<string, RoomState>} */
     this.rooms = new Map();
-    /** @type {Map<string, string>} socketId â†’ roomId */
+    /** @type {Map<string, string>} socketId → roomId */
     this.socketToRoom = new Map();
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ────────────────────────────────────────────────
   //  Internal helpers
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ────────────────────────────────────────────────
 
   _generateRoomId() {
     return randomBytes(3).toString('hex').toUpperCase();
@@ -46,19 +46,12 @@ class RoomManager {
     this.io.to(room.id).emit('room:state', this._serializeRoom(room));
   }
 
+  // ────────────────────────────────────────────────
+  //  Public API (called from index.js socket handlers)
+  // ────────────────────────────────────────────────
+
   _broadcastPublicRooms() {
-    const list = [];
-    for (const room of this.rooms.values()) {
-      if (!room.isPrivate && room.phase === 'lobby' && room.players.size < 5) {
-        const host = room.players.get(room.hostId);
-        list.push({
-          id: room.id,
-          hostName: host ? host.name : 'Sconosciuto',
-          playerCount: room.players.size,
-          maxPlayers: 5
-        });
-      }
-    }
+    const list = this.getPublicRoomsList();
     this.io.emit('rooms:public_list', list);
   }
 
@@ -78,17 +71,14 @@ class RoomManager {
     return list;
   }
 
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  //  Public API (called from index.js socket handlers)
-  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
   createRoom(socket, playerName, isPrivate = false) {
     const roomId = this._generateRoomId();
     /** @type {RoomState} */
     const room = {
       id:             roomId,
       hostId:         socket.id,
-      isPrivate:      isPrivate,
+      isPrivate,
+
       phase:          'lobby',
       clipId:         null,
       clipMeta:       null,
@@ -103,7 +93,7 @@ class RoomManager {
     socket.emit('room:joined', { roomId, isHost: true });
     this._broadcastState(room);
     this._broadcastPublicRooms();
-    console.log(`[Room] Created ${isPrivate ? 'Private' : 'Public'} ${roomId} by ${playerName} (${socket.id})`);
+    console.log(`[Room] Created ${roomId} by ${playerName} (${socket.id})`);
   }
 
   joinRoom(socket, roomId, playerName) {
@@ -113,11 +103,7 @@ class RoomManager {
       return;
     }
     if (room.phase !== 'lobby') {
-      socket.emit('room:error', { message: 'La partita Ã¨ giÃ  in corso. Aspetta la prossima.' });
-      return;
-    }
-    if (room.players.size >= 5) {
-      socket.emit('room:error', { message: 'La stanza Ã¨ piena (massimo 5 giocatori).' });
+      socket.emit('room:error', { message: 'La partita è già in corso. Aspetta la prossima.' });
       return;
     }
 
@@ -127,7 +113,6 @@ class RoomManager {
 
     socket.emit('room:joined', { roomId, isHost: false });
     this._broadcastState(room);
-    this._broadcastPublicRooms();
     console.log(`[Room] ${playerName} joined ${roomId}`);
   }
 
@@ -147,7 +132,7 @@ class RoomManager {
 
       for (const player of room.players.values()) player.characterId = null;
       room.confirmedTakes.clear();
-
+      this._broadcastPublicRooms();
       this._broadcastState(room);
     } catch (err) {
       console.error('[RoomManager] importClip error:', err);
@@ -174,7 +159,6 @@ class RoomManager {
     room.confirmedTakes.clear();
 
     this._broadcastState(room);
-    this._broadcastPublicRooms();
   }
 
   selectCharacter(socket, charId) {
@@ -188,7 +172,7 @@ class RoomManager {
     // Check if someone else already has this character
     for (const [pid, player] of room.players) {
       if (player.characterId === charId && pid !== socket.id) {
-        socket.emit('role:error', { message: `${charId} Ã¨ giÃ  occupato da ${player.name}.` });
+        socket.emit('role:error', { message: `${charId} è già occupato da ${player.name}.` });
         return;
       }
     }
@@ -221,8 +205,7 @@ class RoomManager {
     room.phase = 'recording';
     room.confirmedTakes.clear();
     this._broadcastState(room);
-    this._broadcastPublicRooms();
-    console.log(`[Room] ${room.id} â†’ recording`);
+    console.log(`[Room] ${room.id} → recording`);
   }
 
   submitTake(socket, charId, audioData) {
@@ -252,7 +235,7 @@ class RoomManager {
       for (const [cid, buf] of room.confirmedTakes) takes[cid] = buf;
       this.io.to(room.id).emit('all:confirmed', { takes });
       this._broadcastState(room);
-      console.log(`[Room] ${room.id} â†’ all confirmed, playback!`);
+      console.log(`[Room] ${room.id} → all confirmed, playback!`);
     }
   }
 
@@ -267,8 +250,7 @@ class RoomManager {
     room.confirmedTakes.clear();
 
     this._broadcastState(room);
-    this._broadcastPublicRooms();
-    console.log(`[Room] ${room.id} reset to lobby`);
+    console.log(`[Room] ${room.id} reset to lobby by host.`);
   }
 
   handleDisconnect(socket) {
@@ -299,13 +281,11 @@ class RoomManager {
     if (room.players.size === 0) {
       this.rooms.delete(room.id);
       console.log(`[Room] ${room.id} destroyed (empty)`);
-    } else {
-      this._broadcastState(room);
+      return;
     }
 
-    this._broadcastPublicRooms();
+    this._broadcastState(room);
   }
 }
 
 module.exports = RoomManager;
-
