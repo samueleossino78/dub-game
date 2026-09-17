@@ -12,10 +12,13 @@ const RoomUI = (() => {
   function _playMusic() {
     const audio = document.getElementById('bg-music');
     if (audio && audio.paused) {
-      audio.volume = 0.2; // keep it low
+      audio.volume = 0.5; // volume al 50%
       audio.play().catch(e => console.warn('Autoplay blocked:', e));
     }
   }
+
+  // Tenta di farla partire al primo clic qualsiasi sullo schermo
+  document.addEventListener('click', _playMusic, { once: true });
 
   function init() {
     // ── Home ────────────────────────────────────────
