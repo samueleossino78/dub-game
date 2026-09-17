@@ -1,4 +1,4 @@
-/* public/js/roomUI.js
+﻿/* public/js/roomUI.js
  * Handles Home, Lobby and Role-Select UI.
  * Reads App.isHost and App.myCharId; emits via SocketClient.
  */
@@ -77,7 +77,7 @@ const RoomUI = (() => {
       const code = document.getElementById('room-code-display').textContent;
       navigator.clipboard.writeText(code).then(() => {
         const btn = document.getElementById('btn-copy-code');
-        btn.textContent = '✓';
+        btn.textContent = '✅';
         setTimeout(() => btn.textContent = '📋', 1500);
       }).catch(() => { /* clipboard not available */ });
     });
@@ -95,7 +95,7 @@ const RoomUI = (() => {
       SocketClient.emit('clip:select', { clipId });
     });
 
-    // ── Role select ───────────────────────────────────
+    // ── Role select ─────────────────────────────────
     document.getElementById('btn-start-recording').addEventListener('click', () => {
       SocketClient.emit('recording:start', {});
     });
@@ -113,7 +113,7 @@ const RoomUI = (() => {
       const isMe   = p.id === SocketClient.getId();
       const isHost = p.id === state.hostId;
       return '<div class="player-card' + (isMe ? ' is-me' : '') + (isHost ? ' is-host' : '') + '">' +
-             (isHost ? '👑' : '🎭') + ' ' + _esc(p.name) + (isMe ? ' <em>(tu)</em>' : '') +
+             (isHost ? '👑' : '👤') + ' ' + _esc(p.name) + (isMe ? ' <em>(tu)</em>' : '') +
              '</div>';
     }).join('');
 
@@ -144,7 +144,7 @@ const RoomUI = (() => {
     const grid = document.getElementById('character-grid');
 
     if (!state.clipMeta?.personaggi?.length) {
-      grid.innerHTML = '<p style="color:var(--muted)">Clip senza personaggi separati — traccia audio unica.</p>';
+      grid.innerHTML = '<p style="color:var(--muted)">Clip senza personaggi separati - traccia audio unica.</p>';
       return;
     }
 
@@ -159,7 +159,7 @@ const RoomUI = (() => {
       const cls      = isMe ? 'selected' : isTaken ? 'taken' : '';
       const status   = isMe
         ? '✅ Tu'
-        : isTaken ? '🔒 ' + _esc(assigned.name) : '🎤 Libero';
+        : isTaken ? '❌ ' + _esc(assigned.name) : '✔️ Libero';
       return '<div class="char-card ' + cls + '" data-char-id="' + _esc(char.id) + '">' +
                '<div class="char-name">' + _esc(char.nome) + '</div>' +
                '<div class="char-status">' + status + '</div>' +
@@ -193,7 +193,7 @@ const RoomUI = (() => {
     const isMe = playerId === SocketClient.getId();
     card.classList.toggle('selected', isMe);
     card.classList.toggle('taken',    !isMe);
-    card.querySelector('.char-status').textContent = isMe ? '✅ Tu' : '🔒 ' + playerName;
+    card.querySelector('.char-status').textContent = isMe ? '✅ Tu' : '❌ ' + playerName;
     if (isMe) App.myCharId = charId;
   }
 
@@ -201,7 +201,7 @@ const RoomUI = (() => {
     const card = document.querySelector('[data-char-id="' + charId + '"]');
     if (!card) return;
     card.classList.remove('selected', 'taken');
-    card.querySelector('.char-status').textContent = '🎤 Libero';
+    card.querySelector('.char-status').textContent = '✔️ Libero';
     if (charId === App.myCharId) App.myCharId = null;
   }
 
@@ -217,6 +217,26 @@ const RoomUI = (() => {
     return String(str)
       .replace(/&/g,'&amp;').replace(/</g,'&lt;')
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  
+  function renderPublicRooms(list) {
+    const container = document.getElementById('public-rooms-list');
+    if (!container) return;
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div class="empty-rooms">Nessuna stanza pubblica disponibile al momento.</div>';
+      return;
+    }
+    container.innerHTML = list.map(room => \<div class="public-room-item"><div class="public-room-info"><div class="public-room-name">Stanza di \</div><div class="public-room-count">Giocatori: \/\</div></div><button class="btn btn-secondary btn-join-public" data-room-id="\">Entra</button></div>\).join('');
+    container.querySelectorAll('.btn-join-public').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nameInput = document.getElementById('player-name');
+        const name = nameInput.value.trim();
+        if (!_requireName(name)) return;
+        App.myName = name;
+        _playMusic();
+        SocketClient.emit('room:join', { roomId: btn.dataset.roomId, playerName: name });
+      });
+    });
   }
 
   return { init, renderLobby, renderRoleSelect, onRoleTaken, onRoleReleased, renderPublicRooms };
