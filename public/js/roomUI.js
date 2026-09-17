@@ -1,4 +1,4 @@
-/* public/js/roomUI.js
+﻿/* public/js/roomUI.js
  * Handles Home, Lobby and Role-Select UI.
  * Reads App.isHost and App.myCharId; emits via SocketClient.
  */
@@ -6,9 +6,9 @@
 
 const RoomUI = (() => {
 
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   //  Init (attach one-time listeners)
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function _playMusic() {
     const audio = document.getElementById('bg-music');
     if (audio && audio.paused) {
@@ -21,28 +21,28 @@ const RoomUI = (() => {
   document.addEventListener('click', _playMusic, { once: true });
 
   function init() {
-    // ── Volume Control ──────────────────────────────
+    // â”€â”€ Volume Control â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const bgAudio = document.getElementById('bg-music');
     const btnMute = document.getElementById('btn-mute');
     const volSlider = document.getElementById('volume-slider');
 
     btnMute.addEventListener('click', () => {
       bgAudio.muted = !bgAudio.muted;
-      btnMute.textContent = bgAudio.muted ? '🔇' : '🔊';
+      btnMute.textContent = bgAudio.muted ? 'ðŸ”‡' : 'ðŸ”Š';
     });
 
     volSlider.addEventListener('input', (e) => {
       bgAudio.volume = e.target.value;
       if (bgAudio.volume === 0 || bgAudio.volume === "0") {
         bgAudio.muted = true;
-        btnMute.textContent = '🔇';
+        btnMute.textContent = 'ðŸ”‡';
       } else {
         bgAudio.muted = false;
-        btnMute.textContent = '🔊';
+        btnMute.textContent = 'ðŸ”Š';
       }
     });
 
-    // ── Home ────────────────────────────────────────
+    // â”€â”€ Home â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const nameInput = document.getElementById('player-name');
 
     document.getElementById('btn-create').addEventListener('click', () => {
@@ -74,14 +74,21 @@ const RoomUI = (() => {
       if (e.key === 'Enter') document.getElementById('btn-create').click();
     });
 
-    // ── Lobby ───────────────────────────────────────
+    // â”€â”€ Lobby â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('btn-copy-code').addEventListener('click', () => {
       const code = document.getElementById('room-code-display').textContent;
       navigator.clipboard.writeText(code).then(() => {
         const btn = document.getElementById('btn-copy-code');
-        btn.textContent = '✓';
-        setTimeout(() => btn.textContent = '📋', 1500);
+        btn.textContent = 'âœ“';
+        setTimeout(() => btn.textContent = 'ðŸ“‹', 1500);
       }).catch(() => { /* clipboard not available */ });
+    });
+
+    document.getElementById('btn-import-clip').addEventListener('click', () => {
+      const url = prompt('Incolla l\\'URL del file JSON (Community Pack):');
+      if (url && url.startsWith('http')) {
+        SocketClient.emit('clip:import', { url: url.trim() });
+      }
     });
 
     document.getElementById('btn-start-role-select').addEventListener('click', () => {
@@ -90,15 +97,15 @@ const RoomUI = (() => {
       SocketClient.emit('clip:select', { clipId });
     });
 
-    // ── Role select ───────────────────────────────────
+    // â”€â”€ Role select â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     document.getElementById('btn-start-recording').addEventListener('click', () => {
       SocketClient.emit('recording:start', {});
     });
   }
 
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   //  Lobby render
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function renderLobby(state) {
     document.getElementById('room-code-display').textContent = state.id;
 
@@ -108,7 +115,7 @@ const RoomUI = (() => {
       const isMe   = p.id === SocketClient.getId();
       const isHost = p.id === state.hostId;
       return '<div class="player-card' + (isMe ? ' is-me' : '') + (isHost ? ' is-host' : '') + '">' +
-             (isHost ? '👑' : '🎭') + ' ' + _esc(p.name) + (isMe ? ' <em>(tu)</em>' : '') +
+             (isHost ? 'ðŸ‘‘' : 'ðŸŽ­') + ' ' + _esc(p.name) + (isMe ? ' <em>(tu)</em>' : '') +
              '</div>';
     }).join('');
 
@@ -129,9 +136,9 @@ const RoomUI = (() => {
     }
   }
 
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   //  Role Select render
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderRoleSelect(state) {
     const titleEl = document.getElementById('clip-title-display');
     titleEl.textContent = state.clipMeta?.titolo || state.clipId || 'Clip';
@@ -139,7 +146,7 @@ const RoomUI = (() => {
     const grid = document.getElementById('character-grid');
 
     if (!state.clipMeta?.personaggi?.length) {
-      grid.innerHTML = '<p style="color:var(--muted)">Clip senza personaggi separati — traccia audio unica.</p>';
+      grid.innerHTML = '<p style="color:var(--muted)">Clip senza personaggi separati â€” traccia audio unica.</p>';
       return;
     }
 
@@ -153,8 +160,8 @@ const RoomUI = (() => {
       const isTaken  = !!assigned && !isMe;
       const cls      = isMe ? 'selected' : isTaken ? 'taken' : '';
       const status   = isMe
-        ? '✅ Tu'
-        : isTaken ? '🔒 ' + _esc(assigned.name) : '🎤 Libero';
+        ? 'âœ… Tu'
+        : isTaken ? 'ðŸ”’ ' + _esc(assigned.name) : 'ðŸŽ¤ Libero';
       return '<div class="char-card ' + cls + '" data-char-id="' + _esc(char.id) + '">' +
                '<div class="char-name">' + _esc(char.nome) + '</div>' +
                '<div class="char-status">' + status + '</div>' +
@@ -179,16 +186,16 @@ const RoomUI = (() => {
     if (btnRec) btnRec.hidden = !App.isHost;
   }
 
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   //  Role event patch-updates (no full re-render needed)
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function onRoleTaken(charId, playerId, playerName) {
     const card = document.querySelector('[data-char-id="' + charId + '"]');
     if (!card) return;
     const isMe = playerId === SocketClient.getId();
     card.classList.toggle('selected', isMe);
     card.classList.toggle('taken',    !isMe);
-    card.querySelector('.char-status').textContent = isMe ? '✅ Tu' : '🔒 ' + playerName;
+    card.querySelector('.char-status').textContent = isMe ? 'âœ… Tu' : 'ðŸ”’ ' + playerName;
     if (isMe) App.myCharId = charId;
   }
 
@@ -196,13 +203,13 @@ const RoomUI = (() => {
     const card = document.querySelector('[data-char-id="' + charId + '"]');
     if (!card) return;
     card.classList.remove('selected', 'taken');
-    card.querySelector('.char-status').textContent = '🎤 Libero';
+    card.querySelector('.char-status').textContent = 'ðŸŽ¤ Libero';
     if (charId === App.myCharId) App.myCharId = null;
   }
 
-  // ────────────────────────────────────────────────
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   //  Helpers
-  // ── Helpers ─────────────────────────────────────
+  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function renderPublicRooms(list) {
     const container = document.getElementById('public-rooms-list');
     if (!container) return;
@@ -249,3 +256,4 @@ const RoomUI = (() => {
 
   return { init, renderLobby, renderRoleSelect, onRoleTaken, onRoleReleased, renderPublicRooms };
 })();
+

@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 const express  = require('express');
 const http     = require('http');
@@ -11,27 +11,27 @@ const RoomManager  = require('./roomManager');
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, {
-  maxHttpBufferSize: 50e6,   // 50 MB — enough for ~5 min of Opus audio
+  maxHttpBufferSize: 50e6,   // 50 MB â€” enough for ~5 min of Opus audio
   cors: { origin: '*' },
 });
 
 const clipRegistry = new ClipRegistry();
 const roomManager  = new RoomManager(io, clipRegistry);
 
-// ── Static assets ────────────────────────────────
+// â”€â”€ Static assets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
 
-// ── REST ─────────────────────────────────────────
+// â”€â”€ REST â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/api/clips', (_req, res) => {
   res.json(clipRegistry.listClips());
 });
 
-// ── Socket.io ────────────────────────────────────
+// â”€â”€ Socket.io â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 io.on('connection', socket => {
   console.log(`[+] ${socket.id}`);
 
-  // Invia sùbito la lista pubblica al client appena connesso
+  // Invia sÃ¹bito la lista pubblica al client appena connesso
   socket.emit('rooms:public_list', roomManager.getPublicRoomsList());
 
   socket.on('room:create', ({ playerName, isPrivate } = {}) => {
@@ -44,6 +44,10 @@ io.on('connection', socket => {
       (roomId || '').toUpperCase().trim(),
       (playerName || 'Anonimo').trim().slice(0, 20)
     );
+  });
+
+  socket.on('clip:import', ({ url } = {}) => {
+    roomManager.importClip(socket, url);
   });
 
   socket.on('clip:select', ({ clipId } = {}) => {
@@ -78,8 +82,9 @@ io.on('connection', socket => {
   });
 });
 
-// ── Start ─────────────────────────────────────────
+// â”€â”€ Start â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🎬  DubGame Supremo  →  http://localhost:${PORT}`);
+  console.log(`ðŸŽ¬  DubGame Supremo  â†’  http://localhost:${PORT}`);
 });
+

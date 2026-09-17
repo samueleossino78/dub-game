@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DubGame Supremo - Maker Tool</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { padding: 20px; overflow-y: auto; display: block; }
+    .maker-container { max-width: 900px; margin: 0 auto; background: var(--surface); padding: 20px; border-radius: 12px; }
+    .input-group { margin-bottom: 15px; text-align: left; }
+    .input-group label { display: block; margin-bottom: 5px; color: var(--accent2); font-weight: bold; }
+    .input-group input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: #fff; }
+    #video-container { margin: 20px 0; text-align: center; }
+    video { max-width: 100%; border-radius: 8px; border: 2px solid var(--border); }
+    .char-selector { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .char-btn { padding: 10px 20px; border-radius: 20px; background: var(--surface2); cursor: pointer; border: 2px solid transparent; }
+    .char-btn.active { border-color: var(--accent); background: rgba(255,107,107,0.2); }
+    .recording-indicator { color: var(--accent); font-weight: bold; animation: pulse 1s infinite; display: none; margin-bottom: 10px; font-size: 1.2rem;}
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    pre { background: #000; padding: 15px; border-radius: 8px; overflow-x: auto; text-align: left; font-size: 0.9rem; }
+    .takes-list { text-align: left; margin-top: 20px; }
+    .take-item { background: var(--surface2); padding: 5px 10px; margin-bottom: 5px; border-radius: 4px; display: flex; justify-content: space-between; }
+    .take-item button { background: var(--accent); color: white; border: none; border-radius: 4px; cursor: pointer; padding: 2px 8px; }
+  </style>
+</head>
+<body>
+  <div class="maker-container">
+    <h1 style="text-align:center">🛠️ DubGame Clip Maker</h1>
+    <p style="text-align:center">Strumento segreto per tagliare i tempi delle battute</p>
+    
+    <div class="input-group">
+      <label>ID Clip (es. dragon_ball)</label>
+      <input type="text" id="in-id" value="dragon_ball">
+    </div>
+    <div class="input-group">
+      <label>Titolo (es. Dragon Ball - Goku vs Freezer)</label>
+      <input type="text" id="in-titolo" value="Titolo della scena">
+    </div>
+    <div class="input-group">
+      <label>URL Video MP4 (Supabase o altro)</label>
+      <input type="text" id="in-video" placeholder="https://...">
+    </div>
+    <div class="input-group">
+      <label>URL Soundtrack MP3 (Senza Voci)</label>
+      <input type="text" id="in-soundtrack" placeholder="https://...">
+    </div>
+    <div class="input-group">
+      <label>Personaggi (separati da virgola, es. goku, freezer)</label>
+      <input type="text" id="in-chars" value="goku, freezer">
+      <button class="btn btn-secondary" onclick="setupCharacters()" style="margin-top:10px">Applica Personaggi</button>
+    </div>
+
+    <button class="btn btn-primary" onclick="loadVideo()" style="width:100%; margin-bottom: 20px;">Carica Video</button>
+
+    <div id="video-container" hidden>
+      <video id="player" controls></video>
+      <div style="margin-top: 15px">
+        <h3>1. Seleziona chi sta parlando:</h3>
+        <div id="char-buttons" class="char-selector"></div>
+        
+        <h3>2. Tieni premuta la BARRA SPAZIATRICE mentre il personaggio parla</h3>
+        <div id="rec-indicator" class="recording-indicator">🔴 REGISTRAZIONE TEMPO IN CORSO...</div>
+        
+        <div id="takes-container" class="takes-list"></div>
+      </div>
+      
+      <button class="btn btn-success" onclick="generateJSON()" style="width:100%; margin-top: 30px; font-size: 1.2rem; padding: 15px">📜 Genera Codice JSON</button>
+    </div>
+
+    <div id="json-result" hidden style="margin-top: 30px;">
+      <h3>Copia questo codice e salvalo in un file .json</h3>
+      <pre id="json-output"></pre>
+    </div>
+  </div>
+
+  <script>
+    const player = document.getElementById('player');
+    let characters = [];
+    let activeCharId = null;
+    let takes = {};
+    let isRecording = false;
+    let currentStartTime = 0;
+
+    function loadVideo() {
+      const url = document.getElementById('in-video').value;
+      if(!url) return alert("Inserisci l'URL del video!");
+      player.src = url;
+      document.getElementById('video-container').hidden = false;
+      setupCharacters();
+    }
+
+    function setupCharacters() {
+      const raw = document.getElementById('in-chars').value;
+      characters = raw.split(',').map(s => s.trim().toLowerCase().replace(/ /g, '_')).filter(Boolean);
+      const btnContainer = document.getElementById('char-buttons');
+      btnContainer.innerHTML = '';
+      takes = {};
+      
+      characters.forEach((charId, idx) => {
+        takes[charId] = [];
+        const btn = document.createElement('div');
+        btn.className = 'char-btn' + (idx === 0 ? ' active' : '');
+        btn.textContent = charId.toUpperCase();
+        btn.onclick = () => {
+          document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeCharId = charId;
+        };
+        btnContainer.appendChild(btn);
+        if(idx === 0) activeCharId = charId;
+      });
+      renderTakes();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && document.getElementById('video-container').hidden === false) {
+        if(document.activeElement.tagName === 'INPUT') return;
+        e.preventDefault();
+        if (!isRecording && activeCharId) {
+          isRecording = true;
+          currentStartTime = player.currentTime;
+          document.getElementById('rec-indicator').style.display = 'block';
+        }
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space' && isRecording) {
+        isRecording = false;
+        document.getElementById('rec-indicator').style.display = 'none';
+        
+        const endTime = player.currentTime;
+        if (endTime > currentStartTime + 0.2) {
+          takes[activeCharId].push({ start: currentStartTime, end: endTime });
+          renderTakes();
+        }
+      }
+    });
+
+    function renderTakes() {
+      const container = document.getElementById('takes-container');
+      container.innerHTML = '';
+      for (const charId in takes) {
+        takes[charId].forEach((take, index) => {
+          const div = document.createElement('div');
+          div.className = 'take-item';
+          div.innerHTML = <span><strong> + charId.toUpperCase() + </strong>:  + take.start.toFixed(2) + s -  + take.end.toFixed(2) + s</span>;
+          
+          const delBtn = document.createElement('button');
+          delBtn.textContent = 'X';
+          delBtn.onclick = () => {
+            takes[charId].splice(index, 1);
+            renderTakes();
+          };
+          
+          div.appendChild(delBtn);
+          container.appendChild(div);
+        });
+      }
+    }
+
+    function generateJSON() {
+      const id = document.getElementById('in-id').value;
+      const titolo = document.getElementById('in-titolo').value;
+      const video = document.getElementById('in-video').value;
+      const soundtrack = document.getElementById('in-soundtrack').value;
+      const durata = Math.floor(player.duration) || 0;
+
+      const outPersonaggi = characters.map(charId => {
+        const battute = takes[charId].map(t => [ Number(t.start.toFixed(3)), Number(t.end.toFixed(3)) ]);
+        const vociSeparate = takes[charId].map((t, idx) => ({
+          url: INSERISCI_LINK_VOCE_ + charId + _ + (idx+1) + .mp3,
+          start: Number(t.start.toFixed(3))
+        }));
+        
+        return {
+          id: charId,
+          nome: charId.charAt(0).toUpperCase() + charId.slice(1).replace('_', ' '),
+          battute,
+          vociSeparate
+        };
+      });
+
+      const finalObj = {
+        id,
+        titolo,
+        durata,
+        video,
+        soundtrack,
+        personaggi: outPersonaggi
+      };
+
+      document.getElementById('json-output').textContent = JSON.stringify(finalObj, null, 4);
+      document.getElementById('json-result').hidden = false;
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  </script>
+</body>
+</html>
