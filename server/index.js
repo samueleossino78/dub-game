@@ -31,8 +31,11 @@ app.get('/api/clips', (_req, res) => {
 io.on('connection', socket => {
   console.log(`[+] ${socket.id}`);
 
-  socket.on('room:create', ({ playerName } = {}) => {
-    roomManager.createRoom(socket, (playerName || 'Anonimo').trim().slice(0, 20));
+  // Invia sùbito la lista pubblica al client appena connesso
+  socket.emit('rooms:public_list', roomManager.getPublicRoomsList());
+
+  socket.on('room:create', ({ playerName, isPrivate } = {}) => {
+    roomManager.createRoom(socket, (playerName || 'Anonimo').trim().slice(0, 20), !!isPrivate);
   });
 
   socket.on('room:join', ({ roomId, playerName } = {}) => {

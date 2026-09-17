@@ -30,6 +30,7 @@ class RoomManager {
       id:             room.id,
       phase:          room.phase,
       hostId:         room.hostId,
+      isPrivate:      room.isPrivate,
       clipId:         room.clipId,
       clipMeta:       room.clipMeta || null,
       players:        Array.from(room.players.values()).map(p => ({
@@ -45,16 +46,49 @@ class RoomManager {
     this.io.to(room.id).emit('room:state', this._serializeRoom(room));
   }
 
+  _broadcastPublicRooms() {
+    const list = [];
+    for (const room of this.rooms.values()) {
+      if (!room.isPrivate && room.phase === 'lobby' && room.players.size < 5) {
+        const host = room.players.get(room.hostId);
+        list.push({
+          id: room.id,
+          hostName: host ? host.name : 'Sconosciuto',
+          playerCount: room.players.size,
+          maxPlayers: 5
+        });
+      }
+    }
+    this.io.emit('rooms:public_list', list);
+  }
+
+  getPublicRoomsList() {
+    const list = [];
+    for (const room of this.rooms.values()) {
+      if (!room.isPrivate && room.phase === 'lobby' && room.players.size < 5) {
+        const host = room.players.get(room.hostId);
+        list.push({
+          id: room.id,
+          hostName: host ? host.name : 'Sconosciuto',
+          playerCount: room.players.size,
+          maxPlayers: 5
+        });
+      }
+    }
+    return list;
+  }
+
   // ────────────────────────────────────────────────
   //  Public API (called from index.js socket handlers)
   // ────────────────────────────────────────────────
 
-  createRoom(socket, playerName) {
+  createRoom(socket, playerName, isPrivate = false) {
     const roomId = this._generateRoomId();
     /** @type {RoomState} */
     const room = {
       id:             roomId,
       hostId:         socket.id,
+      isPrivate:      isPrivate,
       phase:          'lobby',
       clipId:         null,
       clipMeta:       null,
@@ -68,7 +102,8 @@ class RoomManager {
 
     socket.emit('room:joined', { roomId, isHost: true });
     this._broadcastState(room);
-    console.log(`[Room] Created ${roomId} by ${playerName} (${socket.id})`);
+    this._broadcastPublicRooms();
+    console.log(`[Room] Created ${isPrivate ? 'Private' : 'Public'} ${roomId} by ${playerName} (${socket.id})`);
   }
 
   joinRoom(socket, roomId, playerName) {
@@ -81,6 +116,10 @@ class RoomManager {
       socket.emit('room:error', { message: 'La partita è già in corso. Aspetta la prossima.' });
       return;
     }
+    if (room.players.size >= 5) {
+      socket.emit('room:error', { message: 'La stanza è piena (massimo 5 giocatori).' });
+      return;
+    }
 
     room.players.set(socket.id, { id: socket.id, name: playerName, characterId: null });
     this.socketToRoom.set(socket.id, roomId);
@@ -88,6 +127,7 @@ class RoomManager {
 
     socket.emit('room:joined', { roomId, isHost: false });
     this._broadcastState(room);
+    this._broadcastPublicRooms();
     console.log(`[Room] ${playerName} joined ${roomId}`);
   }
 
@@ -110,6 +150,7 @@ class RoomManager {
     room.confirmedTakes.clear();
 
     this._broadcastState(room);
+    this._broadcastPublicRooms();
   }
 
   selectCharacter(socket, charId) {
@@ -156,6 +197,7 @@ class RoomManager {
     room.phase = 'recording';
     room.confirmedTakes.clear();
     this._broadcastState(room);
+    this._broadcastPublicRooms();
     console.log(`[Room] ${room.id} → recording`);
   }
 
@@ -201,7 +243,8 @@ class RoomManager {
     room.confirmedTakes.clear();
 
     this._broadcastState(room);
-    console.log(`[Room] ${room.id} reset to lobby by host.`);
+    this._broadcastPublicRooms();
+    console.log(`[Room] ${room.id} reset to lobby`);
   }
 
   handleDisconnect(socket) {
@@ -232,10 +275,11 @@ class RoomManager {
     if (room.players.size === 0) {
       this.rooms.delete(room.id);
       console.log(`[Room] ${room.id} destroyed (empty)`);
-      return;
+    } else {
+      this._broadcastState(room);
     }
 
-    this._broadcastState(room);
+    this._broadcastPublicRooms();
   }
 }
 

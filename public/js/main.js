@@ -47,6 +47,11 @@ function applyHostVisibility(isHost) {
 // ────────────────────────────────────────────────
 function _registerSocketHandlers() {
 
+  // ── Public Rooms List ───────────────────────────
+  SocketClient.on('rooms:public_list', list => {
+    RoomUI.renderPublicRooms(list);
+  });
+
   // ── Joined a room ───────────────────────────────
   SocketClient.on('room:joined', ({ roomId, isHost }) => {
     App.roomId = roomId;

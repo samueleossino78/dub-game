@@ -346,3 +346,17 @@ select option { background:var(--surface); }
 .volume-widget:hover { background: rgba(22, 33, 62, 1); }
 #btn-mute { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0; outline: none; }
 #volume-slider { width: 80px; accent-color: var(--accent); cursor: pointer; }
+
+
+/* Public Rooms & Checkbox */
+.private-checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--muted); margin-bottom: 10px; cursor: pointer; justify-content: center; }
+.private-checkbox input { accent-color: var(--accent); transform: scale(1.2); cursor: pointer; }
+.public-rooms-container { margin-top: 30px; text-align: center; }
+.public-rooms-container h3 { margin-bottom: 15px; color: var(--accent2); font-weight: 500; font-size: 1.2rem; }
+.public-rooms-list { display: flex; flex-direction: column; gap: 10px; }
+.public-room-item { background: var(--surface2); padding: 12px 20px; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); transition: transform 0.2s, border-color 0.2s; }
+.public-room-item:hover { transform: translateY(-2px); border-color: var(--accent); }
+.public-room-info { text-align: left; }
+.public-room-name { font-weight: bold; font-size: 1.1rem; color: #fff; }
+.public-room-count { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+.empty-rooms { color: var(--muted); font-style: italic; font-size: 0.9rem; }

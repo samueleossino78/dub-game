@@ -48,9 +48,12 @@ const RoomUI = (() => {
     document.getElementById('btn-create').addEventListener('click', () => {
       const name = nameInput.value.trim();
       if (!_requireName(name)) return;
+      
+      const isPrivate = document.getElementById('check-private').checked;
+      
       App.myName = name;
       _playMusic();
-      SocketClient.emit('room:create', { playerName: name });
+      SocketClient.emit('room:create', { playerName: name, isPrivate });
     });
 
     document.getElementById('btn-join').addEventListener('click', () => {
@@ -199,7 +202,40 @@ const RoomUI = (() => {
 
   // ────────────────────────────────────────────────
   //  Helpers
-  // ────────────────────────────────────────────────
+  // ── Helpers ─────────────────────────────────────
+  function renderPublicRooms(list) {
+    const container = document.getElementById('public-rooms-list');
+    if (!container) return;
+    
+    if (!list || list.length === 0) {
+      container.innerHTML = '<div class="empty-rooms">Nessuna stanza pubblica disponibile al momento.</div>';
+      return;
+    }
+    
+    container.innerHTML = list.map(room => `
+      <div class="public-room-item">
+        <div class="public-room-info">
+          <div class="public-room-name">Stanza di ${_esc(room.hostName)}</div>
+          <div class="public-room-count">Giocatori: ${room.playerCount}/${room.maxPlayers}</div>
+        </div>
+        <button class="btn btn-secondary btn-join-public" data-room-id="${room.id}">Entra</button>
+      </div>
+    `).join('');
+    
+    // Attach event listeners to join buttons
+    container.querySelectorAll('.btn-join-public').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const nameInput = document.getElementById('player-name');
+        const name = nameInput.value.trim();
+        if (!_requireName(name)) return;
+        
+        App.myName = name;
+        _playMusic();
+        SocketClient.emit('room:join', { roomId: btn.dataset.roomId, playerName: name });
+      });
+    });
+  }
+
   function _requireName(name) {
     if (!name) { alert('Inserisci il tuo nome!'); return false; }
     return true;
@@ -211,5 +247,5 @@ const RoomUI = (() => {
       .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  return { init, renderLobby, renderRoleSelect, onRoleTaken, onRoleReleased };
+  return { init, renderLobby, renderRoleSelect, onRoleTaken, onRoleReleased, renderPublicRooms };
 })();

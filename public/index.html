@@ -26,13 +26,27 @@
     </div>
     <div class="home-card">
       <input id="player-name" type="text" placeholder="Il tuo nome..." maxlength="20" autocomplete="off">
+      
       <div class="home-actions">
-        <button id="btn-create" class="btn btn-primary">🏠 Crea Stanza</button>
-        <div class="divider">oppure</div>
+        <label class="private-checkbox">
+          <input type="checkbox" id="check-private"> Stanza Privata (con codice)
+        </label>
+        <button id="btn-create" class="btn btn-primary">🎬 Crea Stanza</button>
+        
+        <div class="divider">oppure entra con codice</div>
+        
         <div class="join-group">
           <input id="room-code-input" type="text" placeholder="CODICE" maxlength="6" autocomplete="off">
           <button id="btn-join" class="btn btn-secondary">🚪 Entra</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Lista Stanze Pubbliche -->
+    <div class="public-rooms-container">
+      <h3>🌍 Stanze Pubbliche Attive</h3>
+      <div id="public-rooms-list" class="public-rooms-list">
+        <div class="empty-rooms">Nessuna stanza pubblica disponibile al momento.</div>
       </div>
     </div>
   </section>
