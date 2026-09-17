@@ -1,4 +1,4 @@
-﻿/* public/js/roomUI.js
+/* public/js/roomUI.js
  * Handles Home, Lobby and Role-Select UI.
  * Reads App.isHost and App.myCharId; emits via SocketClient.
  */
@@ -226,7 +226,7 @@ const RoomUI = (() => {
       container.innerHTML = '<div class="empty-rooms">Nessuna stanza pubblica disponibile al momento.</div>';
       return;
     }
-    container.innerHTML = list.map(room => \<div class="public-room-item"><div class="public-room-info"><div class="public-room-name">Stanza di \</div><div class="public-room-count">Giocatori: \/\</div></div><button class="btn btn-secondary btn-join-public" data-room-id="\">Entra</button></div>\).join('');
+    container.innerHTML = list.map(room => `<div class="public-room-item"><div class="public-room-info"><div class="public-room-name">Stanza di ${_esc(room.hostName)}</div><div class="public-room-count">Giocatori: ${room.playerCount}/${room.maxPlayers}</div></div><button class="btn btn-secondary btn-join-public" data-room-id="${room.id}">Entra</button></div>`).join('');
     container.querySelectorAll('.btn-join-public').forEach(btn => {
       btn.addEventListener('click', () => {
         const nameInput = document.getElementById('player-name');
