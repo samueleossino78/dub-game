@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 DubGame Supremo</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════ HOME ═══════════════════════════ -->
+  <section id="view-home">
+    <div class="home-hero">
+      <h1>🎬 DubGame<span class="accent">Supremo</span></h1>
+      <p class="tagline">Il gioco del doppiaggio multiplayer</p>
+    </div>
+    <div class="home-card">
+      <input id="player-name" type="text" placeholder="Il tuo nome..." maxlength="20" autocomplete="off">
+      <div class="home-actions">
+        <button id="btn-create" class="btn btn-primary">🏠 Crea Stanza</button>
+        <div class="divider">oppure</div>
+        <div class="join-group">
+          <input id="room-code-input" type="text" placeholder="CODICE" maxlength="6" autocomplete="off">
+          <button id="btn-join" class="btn btn-secondary">🚪 Entra</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ LOBBY ══════════════════════════ -->
+  <section id="view-lobby" hidden>
+    <div class="room-header">
+      <h2>🎭 Lobby</h2>
+      <div class="room-code-badge">
+        <span>Codice:</span>
+        <strong id="room-code-display">------</strong>
+        <button id="btn-copy-code" class="btn btn-ghost" title="Copia codice">📋</button>
+      </div>
+    </div>
+    <div class="lobby-content">
+      <div class="players-panel">
+        <h3>Giocatori</h3>
+        <div id="player-list"></div>
+      </div>
+      <div class="clip-panel">
+        <div class="host-only">
+          <h3>Scegli una Clip</h3>
+          <select id="clip-select"><option value="">-- Caricamento... --</option></select>
+          <button id="btn-start-role-select" class="btn btn-primary">Avanti → Scegli Personaggi</button>
+        </div>
+        <div id="lobby-waiting-msg" class="waiting-msg non-host-only">
+          ⏳ In attesa che l'host scelga una clip...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════ ROLE SELECT ════════════════════════ -->
+  <section id="view-role-select" hidden>
+    <div class="room-header">
+      <h2>🎭 Scegli il tuo Personaggio</h2>
+      <div id="clip-title-display" class="clip-badge"></div>
+    </div>
+    <div id="character-grid" class="character-grid"></div>
+    <div class="role-select-footer">
+      <p class="hint">Clicca su un personaggio libero per assegnartelo. Clicca di nuovo per liberarlo.</p>
+      <button id="btn-start-recording" class="btn btn-primary" hidden>🎬 Avvia Registrazione</button>
+      <p id="role-waiting-msg" class="waiting-msg non-host-only">In attesa che l'host avvii la registrazione...</p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════ RECORDING ════════════════════════ -->
+  <section id="view-recording" hidden>
+    <div class="recording-layout">
+      <div class="recording-left">
+        <div id="clip-display-area" class="clip-display">
+          <img id="ref-image" src="" alt="Clip" style="display:none;">
+          <video id="ref-video" muted playsinline style="display:none;"></video>
+          <div id="clip-placeholder" class="clip-placeholder">🎬</div>
+        </div>
+        <div class="waveform-wrap">
+          <canvas id="waveform-canvas" width="600" height="100"></canvas>
+          <div id="segment-timer" class="segment-timer">0:00 / 0:00</div>
+        </div>
+      </div>
+      <div class="recording-right">
+        <div id="recording-char-info" class="char-info-box"></div>
+        <div id="recording-status" class="recording-status">Seleziona un frammento per iniziare.</div>
+        <div id="segments-list" class="segments-list"></div>
+        <button id="btn-submit-takes" class="btn btn-success" style="margin-top:20px; width:100%" hidden>✅ Invia Tutte le Take</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════ WAITING ══════════════════════════ -->
+  <section id="view-waiting" hidden>
+    <div class="waiting-layout">
+      <div class="waiting-icon">🎬</div>
+      <h2>Take Confermato! 🎉</h2>
+      <p>In attesa degli altri giocatori...</p>
+      <div id="waiting-list" class="waiting-list"></div>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════ PLAYBACK ═════════════════════════ -->
+  <section id="view-playback" hidden>
+    <div class="playback-layout">
+      <h2>🍿 La Prima Visione</h2>
+      <div class="playback-display">
+        <img id="final-image" src="" alt="Clip" style="display:none;">
+        <video id="final-video" muted playsinline style="display:none;"></video>
+        <div id="playback-placeholder" class="clip-placeholder">🎬</div>
+        <div id="playback-progress-container" class="progress-bar-container abs-bottom" hidden>
+          <div id="playback-progress-bar"></div>
+        </div>
+      </div>
+      <div class="playback-controls">
+        <button id="btn-play-all"   class="btn btn-primary btn-large">▶️ Rivedi il Video</button>
+        <button id="btn-play-again" class="btn btn-ghost" hidden>🔁 Ancora!</button>
+      </div>
+      <div id="cast-list" class="cast-list"></div>
+    </div>
+  </section>
+
+</div><!-- #app -->
+
+<!-- Script load order is intentional: deps before consumers -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/socket.js"></script>
+<script src="/js/audioEngine.js"></script>
+<script src="/js/recorder.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/roomUI.js"></script>
+<script src="/js/recordUI.js"></script>
+<script src="/js/playbackUI.js"></script>
+</body>
+</html>
